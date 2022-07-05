@@ -64,23 +64,8 @@ class ZeroShotImageClassification():
       hy, id, it, ja, ka, ko, ku, lt, lv, mk, mn, mr, ms, my, nb, nl, pl, pt, pt, pt-br, 
       ro, ru, sk, sl, sq, sr, sv, th, tr, uk, ur, vi, zh-cn, zh-tw"""
       return set([code.strip() for code in codes.split(",")])
-  def cos_sim(a: Tensor, b: Tensor):
-   
-    if not isinstance(a, torch.Tensor):
-        a = torch.tensor(a)
 
-    if not isinstance(b, torch.Tensor):
-        b = torch.tensor(b)
-
-    if len(a.shape) == 1:
-        a = a.unsqueeze(0)
-
-    if len(b.shape) == 1:
-        b = b.unsqueeze(0)
-
-    a_norm = torch.nn.functional.normalize(a, p=2, dim=1)
-    b_norm = torch.nn.functional.normalize(b, p=2, dim=1)
-    return torch.mm(a_norm, b_norm.transpose(0, 1))
+  
 
 
 
@@ -118,6 +103,23 @@ class ZeroShotImageClassification():
         *args,
         **kwargs,
     ):
+    def cos_sim(a: Tensor, b: Tensor):
+   
+        if not isinstance(a, torch.Tensor):
+            a = torch.tensor(a)
+
+        if not isinstance(b, torch.Tensor):
+            b = torch.tensor(b)
+
+        if len(a.shape) == 1:
+            a = a.unsqueeze(0)
+
+        if len(b.shape) == 1:
+            b = b.unsqueeze(0)
+
+        a_norm = torch.nn.functional.normalize(a, p=2, dim=1)
+        b_norm = torch.nn.functional.normalize(b, p=2, dim=1)
+        return torch.mm(a_norm, b_norm.transpose(0, 1))
 
         """
         Classify the image using the candidate labels given
