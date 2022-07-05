@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 import scipy 
 
-
+print("Eureka!")
 class ZeroShotImageClassification():
 
 
