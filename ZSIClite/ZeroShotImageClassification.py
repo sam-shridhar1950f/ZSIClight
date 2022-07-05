@@ -7,7 +7,7 @@ import torch
 from torch import Tensor
 import scipy 
 
-print("Eureka!")
+
 class ZeroShotImageClassification():
 
 
@@ -47,7 +47,8 @@ class ZeroShotImageClassification():
             model_tag = "ViT-B/32"
             if "model" in kwargs:
                 model_tag = kwargs["model"] 
-            print("Loading OpenAI CLIP model {} ...".format(model_tag))    
+            print("Loading OpenAI CLIP model {} ...".format(model_tag))
+            print("Eureka!")
             self.model, self.preprocess = clip.load(model_tag, device=device) 
             print("Label language {} ...".format(self.lang))
          else:          
