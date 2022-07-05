@@ -8,7 +8,7 @@ from torch import Tensor
 #import scipy
 from scipy.special import softmax
 
-print("test")
+
 class ZeroShotImageClassification():
 
 
@@ -206,7 +206,7 @@ class ZeroShotImageClassification():
     preds["image"] = image
     preds["scores"] = scores
     preds["labels"] = candidate_labels
-    print(preds)
+    
     return preds
 
 # zsic = ZeroShotImageClassification()
