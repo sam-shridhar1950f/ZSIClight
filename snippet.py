@@ -1,4 +1,4 @@
-from ZSIClite import ZeroShotImageClassification
+from ZSIClitev2 import ZeroShotImageClassification
 
 zsic = ZeroShotImageClassification(lang="es")
 
@@ -19,7 +19,7 @@ Prints the following
 
 #English + CNN based model as vision backbone
 
-from ZSIClite import ZeroShotImageClassification
+from ZSIClitev2 import ZeroShotImageClassification
 
 zsic = ZeroShotImageClassification(model="RN50")
 
