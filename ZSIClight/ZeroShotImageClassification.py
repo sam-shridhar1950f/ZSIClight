@@ -5,9 +5,10 @@ from PIL import Image
 import os
 import torch 
 from torch import Tensor
-import scipy 
+#import scipy
+from scipy.special import softmax
 
-
+print("test")
 class ZeroShotImageClassification():
 
 
@@ -96,13 +97,7 @@ class ZeroShotImageClassification():
       image = image.convert("RGB")
       return image            
 
-  def __call__(
-        self, 
-        image: str,
-        candidate_labels: Union[str, List[str]],
-        *args,
-        **kwargs,
-    ):
+  def __call__(self, image: str, candidate_labels: Union[str, List[str]],*args,**kwargs,):
     def cos_sim(a: Tensor, b: Tensor):
    
         if not isinstance(a, torch.Tensor):
@@ -142,70 +137,79 @@ class ZeroShotImageClassification():
             - **scores** (`List[float]`) -- The probabilities for each of the labels.
         """
 
-        device = "cpu"
+    device = "cpu"
 
-        if self.lang == "en":
-            if "hypothesis_template" in kwargs:
-                hypothesis_template = kwargs["hypothesis_template"] 
-            else:
-                hypothesis_template = "A photo of {}"
-
-            if isinstance(candidate_labels, str):
-              labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels.split(",")]
-            else:    
-              labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels]
+    if self.lang == "en":
+        if "hypothesis_template" in kwargs:
+            hypothesis_template = kwargs["hypothesis_template"] 
         else:
-            if "hypothesis_template" in kwargs:
-                hypothesis_template = kwargs["hypothesis_template"] 
-            else:
-                hypothesis_template = "{}"
+            hypothesis_template = "A photo of {}"
 
-            if isinstance(candidate_labels, str):
-              labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels.split(",")]
-            else:    
-              labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels]
+        if isinstance(candidate_labels, str):
+            labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels.split(",")]
+        else:    
+            labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels]
+    else:
+        if "hypothesis_template" in kwargs:
+            hypothesis_template = kwargs["hypothesis_template"] 
+        else:
+            hypothesis_template = "{}"
+
+        if isinstance(candidate_labels, str):
+            labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels.split(",")]
+        else:    
+            labels = [hypothesis_template.format(candidate_label) for candidate_label in candidate_labels]
 
         # TO BE IMPLEMENTED  
-        if  "top_k" in kwargs:
-             top_k = kwargs["top_k"] 
-        else:
-             top_k = len(labels)
+    if  "top_k" in kwargs:
+        top_k = kwargs["top_k"] 
+    else:
+        top_k = len(labels)
         
 
-        if str(type(self.model)) == "<class 'clip.model.CLIP'>":
-            img = self.preprocess(self._load_image(image)).unsqueeze(0).to(device)
-            text = clip.tokenize(labels).to(device)
-            image_features = self.model.encode_image(img)
-            image_features = image_features.detach().numpy()
-            text_features = self.model.encode_text(text)
+    if str(type(self.model)) == "<class 'clip.model.CLIP'>":
+            
+        img = self.preprocess(self._load_image(image)).unsqueeze(0).to(device)
+        text = clip.tokenize(labels).to(device)
+        image_features = self.model.encode_image(img)
+        image_features = image_features.detach().numpy()
+        text_features = self.model.encode_text(text)
             #text_features = text_features.detach().numpy()
             
             #image_features = image_features.ravel()
             #text_features = text_features.ravel()
             #print(image_features)
             #print(text_features)
-        else:    
+    else:    
             #image_features = torch.tensor(self.model.encode(self._load_image(image)))
             #text_features = torch.tensor(self.text_model.encode(labels))
-            print("F")
+        print("F")
         
-        sim_scores = cos_sim(text_features, image_features)
+    sim_scores = cos_sim(text_features, image_features)
+    #print(sim_scores)
         #simwab = scipy.spatial.distance.cosine(text_features, image_features)
         #print(sim_scores)
         #print(simwab)
-        out = []
-        for sim_score in sim_scores:
-            out.append(sim_score.item() * 100)
-        probs = [[out]]
+    out = []
+    for sim_score in sim_scores:
+        out.append(sim_score.item() * 100)
+    probs = [[out]]
        # probs = probs.softmax(dim=-1).cpu().numpy()
-        probs = scipy.special.softmax(probs)
-        scores = list(probs.flatten())
+    probs = softmax(probs)
+    scores = list(probs.flatten())
         
-        sorted_sl = sorted(zip(scores, candidate_labels), key=lambda t:t[0], reverse=True)  
-        scores, candidate_labels = zip(*sorted_sl)
-        
-        preds = {}
-        preds["image"] = image
-        preds["scores"] = scores
-        preds["labels"] = candidate_labels
-        return preds
+    sorted_sl = sorted(zip(scores, candidate_labels), key=lambda t:t[0], reverse=True)  
+    scores, candidate_labels = zip(*sorted_sl)
+    
+    
+    preds = {}
+    preds["image"] = image
+    preds["scores"] = scores
+    preds["labels"] = candidate_labels
+    print(preds)
+    return preds
+
+# zsic = ZeroShotImageClassification()
+
+# pred = zsic(image=r"C:\Users\Samarth\Desktop\Clark Scholars\cow.jpg", candidate_labels=["cow","scooter"])
+# print(pred)
