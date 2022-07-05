@@ -3,7 +3,8 @@ import clip
 import PIL 
 from PIL import Image
 import os
-from sentence_transformers import SentenceTransformer, util
+import torch 
+from torch import Tensor
 import scipy 
 
 
@@ -50,11 +51,7 @@ class ZeroShotImageClassification():
             self.model, self.preprocess = clip.load(model_tag, device=device) 
             print("Label language {} ...".format(self.lang))
          else:          
-            model_tag = "clip-ViT-B-32"
-            print("Loading sentence transformer model {} ...".format(model_tag))
-            #self.model = SentenceTransformer('clip-ViT-B-32', device=device)
-            #self.text_model = SentenceTransformer('sentence-transformers/clip-ViT-B-32-multilingual-v1', device=device)
-            print("Label language {} ...".format(self.lang))
+            raise("only en is currently supported.")
 
   def available_models(self):
       """Returns the names of available CLIP models"""
@@ -66,6 +63,24 @@ class ZeroShotImageClassification():
       hy, id, it, ja, ka, ko, ku, lt, lv, mk, mn, mr, ms, my, nb, nl, pl, pt, pt, pt-br, 
       ro, ru, sk, sl, sq, sr, sv, th, tr, uk, ur, vi, zh-cn, zh-tw"""
       return set([code.strip() for code in codes.split(",")])
+  def cos_sim(a: Tensor, b: Tensor):
+   
+    if not isinstance(a, torch.Tensor):
+        a = torch.tensor(a)
+
+    if not isinstance(b, torch.Tensor):
+        b = torch.tensor(b)
+
+    if len(a.shape) == 1:
+        a = a.unsqueeze(0)
+
+    if len(b.shape) == 1:
+        b = b.unsqueeze(0)
+
+    a_norm = torch.nn.functional.normalize(a, p=2, dim=1)
+    b_norm = torch.nn.functional.normalize(b, p=2, dim=1)
+    return torch.mm(a_norm, b_norm.transpose(0, 1))
+
 
 
   def _load_image(self, image: str) -> "PIL.Image.Image":
@@ -171,7 +186,7 @@ class ZeroShotImageClassification():
             #text_features = torch.tensor(self.text_model.encode(labels))
             print("F")
         
-        sim_scores = util.cos_sim(text_features, image_features)
+        sim_scores = cos_sim(text_features, image_features)
         #simwab = scipy.spatial.distance.cosine(text_features, image_features)
         #print(sim_scores)
         #print(simwab)
