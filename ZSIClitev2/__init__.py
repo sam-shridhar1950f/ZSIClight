@@ -1,1 +1,0 @@
-from ZSIClitev2.ZeroShotImageClassification import  ZeroShotImageClassification
